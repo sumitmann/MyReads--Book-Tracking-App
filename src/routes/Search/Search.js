@@ -13,22 +13,6 @@ class Search extends React.Component {
     searchText: "",
   };
 
-  updateShelfs = (books) => {
-    const booksInShelf = this.props.books;
-    const booksFound = books.map((book) => {
-      const matchedBook = booksInShelf.find(
-        (bookInShelf) => bookInShelf.id === book.id
-      );
-      if (matchedBook) {
-        book.shelf = matchedBook.shelf;
-        return book;
-      }
-      book.shelf = "none";
-      return book;
-    });
-    return booksFound;
-  };
-
   updateShelfs = (booksFound) => {
     const booksInShelf = this.props.books;
     booksFound.forEach((book) => {
