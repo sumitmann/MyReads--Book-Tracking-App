@@ -8,7 +8,7 @@ class SearchInput extends React.Component {
 
   handleInputChange = event => {
     this.setState({searchTerm: event.target.value});
-    this.props.getSearchedBooks(event.target.value);
+    this.props.searchBooks(event.target.value);
   }
   
   render() {

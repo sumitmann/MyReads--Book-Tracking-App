@@ -1,7 +1,8 @@
 import React from 'react'
 
 function BookActions(props){
-  const {bookId, shelfType, handleUpdate,} = props;
+  const {bookId, shelfType, handleUpdate } = props;
+
   return (
     <div className="dropdown-menu">
       <button 

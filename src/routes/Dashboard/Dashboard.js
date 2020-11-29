@@ -3,28 +3,28 @@ import Shelf from "../../components/BookShelf";
 import Loading from "../../components/Loading";
 
 function Dashboard(props) {
-  const { shelf_books, isLoading, updateBookShelf } = props;
+  const { handleUpdate, isLoading, books } = props;
   return (
     <section className="pb-3 mb-5">
       {isLoading && <Loading />}
       {!isLoading && (
         <div className="container">
           <Shelf
-            books={shelf_books.filter(
+            books={books.filter(
               (book) => book.shelf === "currentlyReading"
             )}
             shelfType="currentlyReading"
-            handleUpdate={updateBookShelf}
+            handleUpdate={handleUpdate}
           />
           <Shelf
-            books={shelf_books.filter((book) => book.shelf === "wantToRead")}
+            books={books.filter((book) => book.shelf === "wantToRead")}
             shelfType="wantToRead"
-            handleUpdate={updateBookShelf}
+            handleUpdate={handleUpdate}
           />
           <Shelf
-            books={shelf_books.filter((book) => book.shelf === "read")}
+            books={books.filter((book) => book.shelf === "read")}
             shelfType="read"
-            handleUpdate={updateBookShelf}
+            handleUpdate={handleUpdate}
           />
         </div>
       )}

@@ -1,60 +1,92 @@
-import React from 'react';
-import * as BooksAPI from '../../utils/BooksAPI';
-import SearchInput from '../../components/SearchInput';
-import Loading from '../../components/Loading';
-import SearchBooks from '../../components/SearchedBooks';
+import React from "react";
+import SearchInput from "../../components/SearchInput";
+import Loading from "../../components/Loading";
+import NoBookFound from "../../components/NoBookFound";
+import SearchedBooks from "../../components/SearchedBooks";
+import * as BooksAPI from "../../utils/BooksAPI";
 
-class Search extends React.Component{
+class Search extends React.Component {
   state = {
-    searchBooks : [],
-    isLoading : false,
+    matchedBooks: [],
+    isLoading: false,
+    noResult: false,
+    searchText: "",
+  };
+
+  updateShelfs = (books) => {
+    const booksInShelf = this.props.books;
+    const booksFound = books.map((book) => {
+      const matchedBook = booksInShelf.find(
+        (bookInShelf) => bookInShelf.id === book.id
+      );
+      if (matchedBook) {
+        book.shelf = matchedBook.shelf;
+        return book;
+      }
+      book.shelf = "none";
+      return book;
+    });
+    return booksFound;
+  };
+
+  updateShelfs = (booksFound) => {
+    const booksInShelf = this.props.books;
+    booksFound.forEach((book) => {
+      const matchedBook = booksInShelf.find(
+        (bookInShelf) => bookInShelf.id === book.id
+      );
+      if (matchedBook) {
+        book.shelf = matchedBook.shelf;
+      } else {
+        book.shelf = "none";
+      }
+    });
+    return booksFound;
   }
 
-  addShelfToBooks = (searchBooks) => {
-    const {shelf_books} = this.props;
-    const shelfAddedBooks = searchBooks.map(searchedBook =>{
-      for (let i = 0; i < shelf_books.length; i++) {
-        if(searchedBook.id === shelf_books[i].id) {
-          searchedBook.shelf = shelf_books[i].shelf;
-          return searchedBook;
+  searchBooks = (searchTerm) => {
+    this.setState({ noResult: false });
+    if (searchTerm.trim().length !== 0) {
+      BooksAPI.search(searchTerm).then((booksFound) => {
+        if (Array.isArray(booksFound)) {
+          this.setState({ matchedBooks: booksFound, noResult: false, isLoading: false });
+        } else if ("error" in booksFound) {
+          this.setState({ matchedBooks: [], noResult: true, isLoading: false });
         }
-      }
-      searchedBook.shelf = "none";
-      return searchedBook;
-    });
-    return shelfAddedBooks;
-  }
+      });
+    } else {
+      this.setState({
+        matchedBooks: [],
+        noResult: true,
+        isLoading: false,
+        searchText: "",
+      });
+    }
+  };
 
-  getSearchedBooks = (searchTerm) => {
-    this.setState({isLoading: true}, () => {
-      if(searchTerm.trim() !== ''){
-        BooksAPI.search(searchTerm.trim())
-        .then(data => {
-          if (!data.error)
-          this.setState({ searchBooks : data, isLoading: false});
-          else
-          this.setState({searchBooks: [], isLoading: false});
-        });
-      }else{
-        this.setState({searchBooks: [], isLoading: false});
-      }
-    });
-  }
-
-  render(){
-    const {updateBookShelf} = this.props;
-    const shelfAddedBooks = this.addShelfToBooks(this.state.searchBooks);
+  render() {
+    const updatedSearchedBooks = this.updateShelfs(this.state.matchedBooks);
     return (
       <section className="pb-3 my-5">
         <div className="container">
-          <SearchInput getSearchedBooks={this.getSearchedBooks}  />
-          {this.state.isLoading
-          ? <Loading/>
-          : <div className="row"><SearchBooks books={shelfAddedBooks} updateBookShelf={updateBookShelf}/></div>}
+          <SearchInput searchBooks={this.searchBooks} />
+          {this.state.noResult && this.state.searchText.length !== 0 && (
+            <NoBookFound searchText={this.state.searchText} />
+          )}
+          {this.state.isLoading ? (
+            <Loading />
+          ) : (
+            <div className="row">
+              <SearchedBooks
+                books={updatedSearchedBooks}
+                handleUpdate={this.props.handleUpdate}
+              />
+            </div>
+          )}
         </div>
       </section>
-    )
+    );
   }
 }
 
-export default Search
+export default Search;

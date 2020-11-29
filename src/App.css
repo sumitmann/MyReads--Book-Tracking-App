@@ -207,6 +207,11 @@ body {
           animation-delay: 2083.3333333333ms;
 }
 
+.no-result-icon {
+  width: 180px;
+  margin: 0 auto 10px;
+}
+
 .shelf {
   width: 300px;
   height: 5px;

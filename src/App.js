@@ -1,59 +1,49 @@
-import React from 'react';
-import {Route} from 'react-router-dom'
-import Navigation from './components/Navigation';
-import Dashboard from './routes/Dashboard/Dashboard';
-import Search from './routes/Search/Search';
-import * as BooksAPI from './utils/BooksAPI';
-import './App.css';
+import React from "react";
+import { Route } from "react-router-dom";
+import Navigation from "./components/Navigation";
+import Dashboard from "./routes/Dashboard/Dashboard";
+import Search from "./routes/Search/Search";
+import * as BooksAPI from "./utils/BooksAPI";
+import "./App.css";
 
 class App extends React.Component {
   state = {
-    shelf_books : [],
-    isLoading : true,
-  }
+    booksInShelves: [],
+    isLoading: true,
+  };
 
-  componentDidMount(){
-    BooksAPI.getAll()
-    .then(data => {
-      this.setState({shelf_books: data, isLoading: false});
+  fetchBooks = () =>
+    BooksAPI.getAll().then((books) => {
+      this.setState({ booksInShelves: books, isLoading: false });
     });
+
+  handleUpdate = (book, shelf) => {
+    BooksAPI.update(book, shelf).then((books) => {
+      this.fetchBooks();
+    });
+  };
+
+  componentDidMount() {
+    return this.fetchBooks();
   }
 
-  updateBookShelf = (book, shelf) => {
-    BooksAPI.update(book, shelf)
-      .then(data => {
-        let shelfBooks = this.state.shelf_books;
-        const bookIndex = shelfBooks.findIndex(b => b.id === book.id);
-        if(bookIndex !== -1){
-          if(shelf === "none") shelfBooks.splice(bookIndex, 1);
-          else shelfBooks[bookIndex].shelf = shelf;
-          this.setState({shelf_books: shelfBooks});
-        }else{
-          BooksAPI.get(book.id)
-          .then(data => {
-            shelfBooks = [...shelfBooks, data];
-            this.setState({shelf_books: shelfBooks});
-          });
-        }
-      });
-  }
   render() {
     return (
-      <div className="App">
+      <div className="app">
         <Navigation />
-        <Route exact path="/" render={()=>(
-          <Dashboard 
-            shelf_books={this.state.shelf_books}
+        <Route exact path="/">
+          <Dashboard
+            handleUpdate={this.handleUpdate}
+            books={this.state.booksInShelves}
             isLoading={this.state.isLoading}
-            updateBookShelf={this.updateBookShelf}
           />
-        )} />
-        <Route exact path="/search" render={()=>(
-          <Search 
-            shelf_books={this.state.shelf_books}
-            updateBookShelf={this.updateBookShelf}
+        </Route>
+        <Route exact path="/search">
+          <Search
+            books={this.state.booksInShelves}
+            handleUpdate={this.handleUpdate}
           />
-        )} />
+        </Route>
       </div>
     );
   }
